@@ -39,7 +39,7 @@ body {
 button, input, select { font: inherit; color: inherit; }
 button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
 
-.screen { min-height: 100dvh; display: flex; flex-direction: column; padding: 20px; gap: 16px; }
+.screen { min-height: 100dvh; display: flex; flex-direction: column; padding: 36px 20px; gap: 16px; }
 .center { align-items: center; justify-content: center; text-align: center; }
 
 .btn {
@@ -58,7 +58,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .bar > i { display: block; height: 100%; width: 100%; background: var(--gold); }
 
 /* ---------- player (phone) ---------- */
-.player .title { font-family: Georgia, "Times New Roman", serif; font-size: 2rem; font-weight: 700; margin: 0 0 6px; }
+.player .title { font-family: Georgia, "Times New Roman", serif; font-size: 2rem; font-weight: 700; margin: 0 0 6px; color: var(--apricot); }
 .player form { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 12px; }
 .player input {
   width: 100%; padding: 16px; border-radius: 10px; border: 2px solid var(--panel-2);
@@ -87,8 +87,8 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .player .gain { font-size: 2.4rem; font-weight: 800; margin: 4px 0; }
 
 /* ---------- host (projector) ---------- */
-.host .screen { padding: clamp(20px, 3vw, 48px); gap: clamp(14px, 2vw, 28px); }
-.host .brand { font-family: Georgia, "Times New Roman", serif; font-size: clamp(22px, 2.2vw, 36px); font-weight: 700; margin: 0; }
+.host .screen { padding: calc(clamp(20px, 3vw, 48px) + 14px) clamp(20px, 3vw, 48px); gap: clamp(14px, 2vw, 28px); }
+.host .brand { font-family: Georgia, "Times New Roman", serif; font-size: clamp(22px, 2.2vw, 36px); font-weight: 700; margin: 0; color: var(--apricot); }
 .host .hint { font-size: clamp(22px, 2.6vw, 42px); color: var(--muted); margin: 0; }
 .host .hint strong { color: var(--cream); }
 .host .code {
@@ -133,7 +133,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .host .row .nm { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .host .row .gn { color: var(--gold); font-size: .75em; }
 .host .row .sc { font-variant-numeric: tabular-nums; }
-.host .final-title { font-family: Georgia, "Times New Roman", serif; font-size: clamp(40px, 6vw, 96px); margin: 0; text-align: center; }
+.host .final-title { font-family: Georgia, "Times New Roman", serif; font-size: clamp(40px, 6vw, 96px); margin: 0; text-align: center; color: var(--apricot); }
 .host .podium { display: flex; gap: clamp(12px, 2vw, 32px); justify-content: center; align-items: flex-end; }
 .host .pod { background: var(--panel); border-radius: 16px 16px 0 0; padding: 18px 28px; text-align: center; min-width: clamp(160px, 20vw, 320px); }
 .host .pod .nm { font-size: clamp(22px, 2.6vw, 44px); font-weight: 800; overflow-wrap: anywhere; }
@@ -148,3 +148,8 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
   .host .reveal-grid { grid-template-columns: 1fr; }
   .host .opts { grid-template-columns: 1fr; }
 }
+
+/* ---------- animated tricolor background ---------- */
+#bg { position: fixed; inset: 0; overflow: hidden; z-index: 0; pointer-events: none; }
+#bg .blob { position: absolute; left: 0; top: 0; border-radius: 50%; filter: blur(48px); opacity: .32; will-change: transform; }
+.screen { position: relative; z-index: 1; }
