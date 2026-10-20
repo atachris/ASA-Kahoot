@@ -1,18 +1,33 @@
 :root {
+  /* Armenian flag tricolor (official hex values) */
+  --flag-red: #d90012;
+  --flag-blue: #0033a0;
+  --flag-orange: #f2a800;
+  /* Pomegranate (deep wine) for backgrounds, apricot for warm accents */
   --bg: #36101c;
   --panel: #4b1827;
   --panel-2: #5d2234;
   --cream: #fff3df;
   --muted: #d9b9a8;
   --ink: #2a0c14;
-  --red: #d90012;
-  --blue: #1747b8;
-  --gold: #f2a800;
+  --apricot: #f7a35c;
+  --red: var(--flag-red);
+  --blue: var(--flag-blue);
+  --gold: var(--flag-orange);
   --green: #1f8a4c;
   --bad: #b3261e;
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; min-height: 100%; }
+
+/* Tricolor band along the top and bottom of every screen */
+body::before, body::after {
+  content: ""; position: fixed; left: 0; right: 0; height: 18px; z-index: 10; pointer-events: none;
+  background: linear-gradient(to bottom,
+    var(--flag-red) 0 33.33%, var(--flag-blue) 33.33% 66.66%, var(--flag-orange) 66.66% 100%);
+}
+body::before { top: 0; }
+body::after { bottom: 0; }
 body {
   background: var(--bg);
   color: var(--cream);
