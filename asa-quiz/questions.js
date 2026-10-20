@@ -1,0 +1,28 @@
+// Edit this file to change questions. "correct" is the 0-based index of the right option.
+module.exports = [
+  { text: "Which board member has been on exec the longest?", options: ["jolie", "chris", "levon", "olivia"], correct: 1 },
+  { text: "when is the due date for all-asa mentorship program?", options: ["oct 20", "oct 22", "oct 21", "oct 23"], correct: 2 },
+  { text: "Which floor of Royal should you be parking on?", options: ["6", "5", "4", "2"], correct: 0 },
+  { text: "What do Levon and Al have in common?", options: ["social chairs", "have had scooter incidents", "tailgate bartenders", "all of the above"], correct: 3 },
+  { text: "Where is the Institute of Armenian Studies?", options: ["USC doesn’t have one", "THH 314", "DMC 351", "Royal 6th Floor"], correct: 2 },
+  { text: "What object does Al always have in his possession?", options: ["camera", "flashlight", "spray bottle", "mini fan"], correct: 2 },
+  { text: "In gata, you roll the dough, cut it, then add the egg wash.", options: ["True", "False"], correct: 1 },
+  { text: "what does our next professional panel focus on?", options: ["pre law", "business", "engineering", "pre med"], correct: 3 },
+  { text: "Which intersection did Levon get slimed out?", options: ["hoover and jefferson", "jefferson and fig", "vermont and exposition", "fig and exposition"], correct: 1 },
+  { text: "What was our first event of this semester?", options: ["tailgate", "welcome tour", "village social", "involvement fair"], correct: 1 },
+  { text: "Which month is artsakh awareness month?", options: ["november", "april", "december", "may"], correct: 0 },
+  { text: "Which board member is usually walking around taking pic during tailgate?", options: ["olivia", "isabella", "jolie", "mayda"], correct: 3 },
+  { text: "How many letters in the Armenian alphabet?", options: ["36", "26", "38", "28"], correct: 2 },
+  { text: "how many nights are we staying in Big Bear?", options: ["2", "1", "3", "4"], correct: 2 },
+  { text: "When can you pick up ur ASA merch?", options: ["big bear", "next gbm", "this gbm", "tomorrow"], correct: 1 },
+  { text: "Where did Manika say you can find her during the first GBM traffic?", options: ["AEO house", "6th Floor Royal", "In Traffic", "At Village by Softies"], correct: 2 },
+  { text: "How many people will be attending Saturday's Halloween party?", options: ["350", "400", "450", "500"], correct: 1 },
+  { text: "How many tailgates have we hosted this year?", options: ["2", "3", "4", "5"], correct: 2 },
+  { text: "When is our Family Weekend Tailgate?", options: ["October 30", "October 31", "November 6", "November 7"], correct: 1 },
+  { text: "How many instagram followers do we have?", options: ["5498", "5525", "5522", "5530"], correct: 2 },
+  { text: "TRUE or FALSE", options: ["True", "False"], correct: 1 },
+  { text: "Who's Treasurer?", options: ["Jolie", "Jessica", "Eva", "Olivia"], correct: 1 },
+  { text: "How many clubs/schools have we collabed with?", options: ["6", "4", "5", "3"], correct: 3 },
+  { text: "Which board member has a twin?", options: ["Levon", "Al", "Jolie", "Manika"], correct: 0 },
+  { text: "Which event was at MENA Lounge?", options: ["PSO Collab", "LSA Collab", "Game Night", "GBM"], correct: 0 }
+];

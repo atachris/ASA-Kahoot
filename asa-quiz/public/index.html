@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ASA Trivia</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body class="player">
+<main id="app"></main>
+<script src="/common.js"></script>
+<script>
+const app = document.getElementById('app');
+const KEY = 'asa-quiz-player';
+let session = null, state = null, es = null, offset = 0, raf = 0;
+try { session = JSON.parse(localStorage.getItem(KEY)); } catch (_) {}
+
+function reset() { cancelAnimationFrame(raf); app.replaceChildren(); }
+function screen(extra) { const s = el('section', 'screen ' + (extra || '')); app.appendChild(s); return s; }
+
+function showJoin(msg) {
+  if (es) { es.close(); es = null; }
+  reset();
+  const s = screen('center');
+  s.appendChild(el('h1', 'title', 'ASA Trivia'));
+  const form = el('form');
+  const code = el('input'); code.placeholder = 'Game code'; code.inputMode = 'numeric'; code.maxLength = 4; code.autocomplete = 'off';
+  code.value = new URLSearchParams(location.search).get('code') || '';
+  const name = el('input'); name.placeholder = 'Your name'; name.maxLength = 16; name.autocomplete = 'off';
+  const err = el('p', 'err', msg || '');
+  const go = el('button', 'btn', 'Join'); go.type = 'submit';
+  form.append(code, name, err, go);
+  form.addEventListener('submit', async ev => {
+    ev.preventDefault();
+    err.textContent = '';
+    go.disabled = true;
+    try {
+      const r = await api('join', { code: code.value.trim(), name: name.value });
+      session = { code: code.value.trim(), pid: r.pid, name: r.name };
+      localStorage.setItem(KEY, JSON.stringify(session));
+      connect();
+    } catch (e) {
+      err.textContent = e.message;
+      go.disabled = false;
+    }
+  });
+  s.appendChild(form);
+  (code.value ? name : code).focus();
+}
+
+function connect() {
+  if (es) es.close();
+  es = new EventSource('/events?role=player&code=' + encodeURIComponent(session.code) + '&pid=' + encodeURIComponent(session.pid));
+  es.onmessage = e => {
+    state = JSON.parse(e.data);
+    offset = state.serverNow - Date.now();
+    render();
+  };
+  es.onerror = () => {
+    if (es && es.readyState === EventSource.CLOSED) {
+      localStorage.removeItem(KEY);
+      session = null;
+      showJoin('That game has ended. Enter a new code.');
+    }
+  };
+}
+
+function runBar(bar) {
+  const tick = () => {
+    const left = Math.max(0, state.endsAt - (Date.now() + offset));
+    bar.firstChild.style.width = (left / state.duration * 100) + '%';
+    if (left > 0) raf = requestAnimationFrame(tick);
+  };
+  tick();
+}
+
+function render() {
+  reset();
+  const s = state;
+  if (s.phase === 'lobby') {
+    const c = screen('center');
+    c.append(el('p', 'big', '✓'), el('h1', 'headline', "You're in, " + s.name), el('p', 'sub', 'Watch the big screen. The game starts soon.'));
+  } else if (s.phase === 'question') {
+    const c = screen();
+    const meta = el('div', 'meta');
+    meta.append(el('span', '', 'Question ' + s.question.number + ' of ' + s.question.total), el('span', '', s.name));
+    const bar = el('div', 'bar'); bar.appendChild(el('i'));
+    c.append(meta, bar);
+    if (s.answered) {
+      const w = el('div', 'center');
+      w.style.cssText = 'flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center';
+      const chosen = el('div', 'locked-opt opt-' + s.choice, SHAPES[s.choice] + '  ' + s.question.options[s.choice]);
+      w.append(el('h1', 'headline', 'Answer locked in'), chosen, el('p', 'sub', 'Waiting for everyone else.'));
+      c.appendChild(w);
+    } else {
+      c.appendChild(el('p', 'q-text', s.question.text));
+      const grid = el('div', 'opts' + (s.question.options.length === 2 ? ' two' : ''));
+      s.question.options.forEach((t, i) => {
+        const b = el('button', 'opt opt-' + i);
+        b.type = 'button';
+        b.append(el('span', 'shape', SHAPES[i]), el('span', '', t));
+        b.addEventListener('click', () => {
+          state.answered = true; state.choice = i; render();
+          api('answer', { code: session.code, pid: session.pid, choice: i }).catch(() => {});
+        });
+        grid.appendChild(b);
+      });
+      c.appendChild(grid);
+    }
+    runBar(bar);
+  } else if (s.phase === 'reveal') {
+    const r = s.result;
+    const c = screen('center ' + (!r.answered ? 'result-late' : r.correct ? 'result-ok' : 'result-bad'));
+    if (!r.answered) {
+      c.append(el('p', 'big', '⏱'), el('h1', 'headline', "Time's up"), el('p', 'sub', 'No answer this round.'));
+    } else if (r.correct) {
+      c.append(el('p', 'big', '✓'), el('h1', 'headline', 'Correct'), el('p', 'gain', '+' + r.gain));
+    } else {
+      c.append(el('p', 'big', '✗'), el('h1', 'headline', 'Not this time'), el('p', 'sub', 'Right answer: ' + s.question.options[r.correctIndex]));
+    }
+    c.append(el('p', 'sub', s.score + ' points'), el('p', 'sub', 'You are #' + r.rank + ' of ' + r.total));
+  } else if (s.phase === 'final') {
+    const c = screen('center');
+    c.append(el('p', 'big', s.final.rank === 1 ? '🏆' : '🎉'),
+      el('h1', 'headline', s.final.rank === 1 ? 'You won!' : 'Game over'),
+      el('p', 'sub', 'You finished #' + s.final.rank + ' of ' + s.final.total),
+      el('p', 'gain', s.final.score + ' points'));
+  }
+}
+
+(async function init() {
+  if (session) {
+    try { await api('rejoin', { code: session.code, pid: session.pid }); connect(); return; }
+    catch (_) { localStorage.removeItem(KEY); session = null; }
+  }
+  showJoin();
+})();
+</script>
+</body>
+</html>

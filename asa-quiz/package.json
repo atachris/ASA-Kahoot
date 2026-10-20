@@ -1,0 +1,8 @@
+{
+  "name": "asa-quiz",
+  "version": "1.0.0",
+  "description": "Kahoot-style live quiz for USC ASA. No dependencies.",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" }
+}

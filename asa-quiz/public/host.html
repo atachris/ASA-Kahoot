@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ASA Trivia: Host</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body class="host">
+<main id="app"></main>
+<script src="/common.js"></script>
+<script>
+const app = document.getElementById('app');
+const KEY = 'asa-quiz-host';
+let saved = null, state = null, es = null, offset = 0, raf = 0, primary = null, chosenCount = null;
+try { saved = JSON.parse(localStorage.getItem(KEY)); } catch (_) {}
+
+function act(action, extra) {
+  return api('host', Object.assign({ code: saved.code, token: saved.token, action }, extra)).catch(e => alert(e.message));
+}
+
+async function newGame() {
+  const g = await api('create');
+  saved = { code: g.code, token: g.token };
+  localStorage.setItem(KEY, JSON.stringify(saved));
+  connect();
+}
+
+function connect() {
+  if (es) es.close();
+  es = new EventSource('/events?role=host&code=' + encodeURIComponent(saved.code) + '&token=' + encodeURIComponent(saved.token));
+  es.onmessage = e => {
+    state = JSON.parse(e.data);
+    offset = state.serverNow - Date.now();
+    render();
+  };
+  es.onerror = () => { if (es.readyState === EventSource.CLOSED) newGame(); };
+}
+
+function screen() { const s = el('section', 'screen'); app.appendChild(s); return s; }
+function button(label, fn, cls) {
+  const b = el('button', 'btn' + (cls ? ' ' + cls : ''), label);
+  b.type = 'button';
+  b.addEventListener('click', fn);
+  return b;
+}
+
+function optionTiles(q, reveal) {
+  const grid = el('div', 'opts' + (q.options.length === 2 ? ' two' : ''));
+  q.options.forEach((t, i) => {
+    const tile = el('div', 'opt opt-' + i);
+    if (reveal) tile.classList.add(i === reveal.correct ? 'right' : 'dim');
+    tile.append(el('span', 'shape', SHAPES[i]), el('span', '', t));
+    if (reveal) tile.appendChild(el('span', 'n', (i === reveal.correct ? '✓ ' : '') + reveal.counts[i]));
+    grid.appendChild(tile);
+  });
+  return grid;
+}
+
+function board(title, rows, showGain) {
+  const b = el('div', 'board');
+  b.appendChild(el('h2', '', title));
+  rows.forEach((p, i) => {
+    const r = el('div', 'row');
+    r.append(el('span', 'rk', String(i + 1)), el('span', 'nm', p.name));
+    if (showGain && p.gain) r.appendChild(el('span', 'gn', '+' + p.gain));
+    r.appendChild(el('span', 'sc', String(p.score)));
+    b.appendChild(r);
+  });
+  return b;
+}
+
+function runClock(node) {
+  const tick = () => {
+    const left = Math.max(0, state.endsAt - (Date.now() + offset));
+    node.textContent = String(Math.ceil(left / 1000));
+    if (left > 0) raf = requestAnimationFrame(tick);
+  };
+  tick();
+}
+
+function render() {
+  cancelAnimationFrame(raf);
+  app.replaceChildren();
+  primary = null;
+  const s = state;
+
+  if (s.phase === 'lobby') {
+    const c = screen();
+    c.style.cssText = 'align-items:center;justify-content:center;text-align:center';
+    const hint = el('p', 'hint');
+    hint.append('Join at ', el('strong', '', location.host), ' and enter the code');
+    c.append(el('h1', 'brand', 'ASA Trivia'), hint, el('p', 'code', s.code));
+    c.appendChild(el('p', 'count', s.playerCount === 0 ? 'Waiting for players' : s.playerCount + (s.playerCount === 1 ? ' player' : ' players') + ' in'));
+    const chips = el('div', 'players');
+    s.players.slice(-60).forEach(n => chips.appendChild(el('span', 'chip', n)));
+    c.appendChild(chips);
+
+    const controls = el('div', 'controls');
+    const sel = el('select');
+    sel.setAttribute('aria-label', 'Number of questions');
+    const opts = [...new Set([5, 10, 15, 20, s.maxQuestions].filter(n => n <= s.maxQuestions))];
+    if (chosenCount == null || !opts.includes(chosenCount)) chosenCount = s.maxQuestions;
+    opts.forEach(n => {
+      const o = el('option', '', n === s.maxQuestions ? 'All ' + n + ' questions' : n + ' questions');
+      o.value = n; if (n === chosenCount) o.selected = true;
+      sel.appendChild(o);
+    });
+    sel.addEventListener('change', () => { chosenCount = Number(sel.value); });
+    const start = button('Start game', () => act('start', { count: chosenCount }));
+    start.disabled = s.playerCount < 1;
+    controls.append(sel, start);
+    c.append(controls, button('Use a new code', () => { if (confirm('This drops everyone who has joined. Continue?')) newGame(); }, 'quiet'));
+    if (!start.disabled) primary = () => act('start', { count: chosenCount });
+
+  } else if (s.phase === 'question') {
+    const c = screen();
+    const top = el('div', 'topbar');
+    const clock = el('div', 'clock');
+    top.append(el('p', 'qnum', 'Question ' + s.question.number + ' of ' + s.question.total), clock);
+    c.append(top, el('h1', 'q-text', s.question.text), optionTiles(s.question));
+    c.appendChild(el('p', 'answered', s.answered + ' of ' + s.playerCount + ' answered'));
+    const foot = el('div', 'foot');
+    foot.appendChild(button('Skip timer', () => act('skip'), 'quiet'));
+    c.appendChild(foot);
+    runClock(clock);
+    primary = () => act('skip');
+
+  } else if (s.phase === 'reveal') {
+    const c = screen();
+    const last = s.question.number >= s.question.total;
+    const top = el('div', 'topbar');
+    top.appendChild(el('p', 'qnum', 'Question ' + s.question.number + ' of ' + s.question.total));
+    const grid = el('div', 'reveal-grid');
+    const left = el('div');
+    left.style.cssText = 'display:flex;flex-direction:column;gap:clamp(14px,2vw,28px)';
+    left.append(el('h1', 'q-text', s.question.text), optionTiles(s.question, s.reveal));
+    grid.append(left, board('Top 5', s.reveal.top, true));
+    const foot = el('div', 'foot');
+    foot.appendChild(button(last ? 'Final results' : 'Next question', () => act('next')));
+    c.append(top, grid, foot);
+    primary = () => act('next');
+
+  } else if (s.phase === 'final') {
+    const c = screen();
+    c.appendChild(el('h1', 'final-title', 'Final results'));
+    const pod = el('div', 'podium');
+    const order = [1, 0, 2];
+    order.forEach(i => {
+      const p = s.final.top[i];
+      if (!p) return;
+      const d = el('div', 'pod p' + (i + 1));
+      d.append(el('div', 'nm', (i + 1) + '. ' + p.name), el('div', 'sc', p.score + ' pts'));
+      pod.appendChild(d);
+    });
+    c.appendChild(pod);
+    if (s.final.top.length > 3) {
+      const rest = board('Next up', s.final.top.slice(3).map(p => p), false);
+      rest.classList.add('rest');
+      rest.querySelectorAll('.rk').forEach((n, i) => { n.textContent = String(i + 4); });
+      c.appendChild(rest);
+    }
+    const foot = el('div', 'foot');
+    foot.append(button('Play again with same players', () => act('restart')), button('New game code', () => newGame(), 'quiet'));
+    c.appendChild(foot);
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if ((e.key === ' ' || e.key === 'Enter') && primary && !['SELECT','BUTTON','INPUT'].includes(document.activeElement.tagName)) {
+    e.preventDefault();
+    primary();
+  }
+});
+
+(async function init() {
+  if (saved) {
+    try { await api('host', { code: saved.code, token: saved.token, action: 'ping' }); connect(); return; }
+    catch (_) { /* game expired, make a new one */ }
+  }
+  newGame();
+})();
+</script>
+</body>
+</html>
