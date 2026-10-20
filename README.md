@@ -1,4 +1,4 @@
-# ASA Trivia
+# USC ASA Trivia
 
 Kahoot-style live quiz. No dependencies, Node 18+.
 

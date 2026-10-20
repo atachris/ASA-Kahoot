@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ASA Trivia: Host</title>
+<title>USC ASA Trivia: Host</title>
 <link rel="stylesheet" href="/style.css">
 </head>
 <body class="host">
@@ -90,7 +90,7 @@ function render() {
     c.style.cssText = 'align-items:center;justify-content:center;text-align:center';
     const hint = el('p', 'hint');
     hint.append('Join at ', el('strong', '', location.host), ' and enter the code');
-    c.append(el('h1', 'brand', 'ASA Trivia'), hint, el('p', 'code', s.code));
+    c.append(el('h1', 'brand', 'USC ASA Trivia'), hint, el('p', 'code', s.code));
     c.appendChild(el('p', 'count', s.playerCount === 0 ? 'Waiting for players' : s.playerCount + (s.playerCount === 1 ? ' player' : ' players') + ' in'));
     const chips = el('div', 'players');
     s.players.slice(-60).forEach(n => chips.appendChild(el('span', 'chip', n)));

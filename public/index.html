@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>ASA Trivia</title>
+<title>USC ASA Trivia</title>
 <link rel="stylesheet" href="/style.css">
 </head>
 <body class="player">
@@ -22,7 +22,7 @@ function showJoin(msg) {
   if (es) { es.close(); es = null; }
   reset();
   const s = screen('center');
-  s.appendChild(el('h1', 'title', 'ASA Trivia'));
+  s.appendChild(el('h1', 'title', 'USC ASA Trivia'));
   const form = el('form');
   const code = el('input'); code.placeholder = 'Game code'; code.inputMode = 'numeric'; code.maxLength = 4; code.autocomplete = 'off';
   code.value = new URLSearchParams(location.search).get('code') || '';
