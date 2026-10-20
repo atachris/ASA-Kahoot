@@ -153,3 +153,45 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 #bg { position: fixed; inset: 0; overflow: hidden; z-index: 0; pointer-events: none; }
 #bg .blob { position: absolute; left: 0; top: 0; border-radius: 50%; filter: blur(48px); opacity: .32; will-change: transform; }
 .screen { position: relative; z-index: 1; }
+#bg .blob:nth-child(3n+2) { opacity: .6; }
+.host .pod .tag { font-size: clamp(16px, 1.8vw, 30px); font-weight: 800; margin: 6px 0; color: var(--apricot); }
+.host .pod.p1 .tag { color: var(--ink); font-size: clamp(22px, 2.6vw, 44px); letter-spacing: .04em; }
+
+/* ---------- winners screen: big podium, first-place glow, last-place section ---------- */
+.host .podium { align-items: flex-end; gap: clamp(14px, 2.4vw, 40px); }
+.host .pod { position: relative; border-radius: 22px 22px 0 0; min-width: clamp(200px, 26vw, 460px); padding: 24px 28px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; gap: 8px; }
+.host .pod .rank { font-family: Georgia, "Times New Roman", serif; font-weight: 700; line-height: 1; font-size: clamp(64px, 9vw, 150px); opacity: .9; }
+.host .pod .nm { font-size: clamp(26px, 3.2vw, 56px); }
+.host .pod .sc { font-size: clamp(20px, 2.2vw, 38px); margin-top: auto; }
+.host .pod.p2 { min-height: clamp(220px, 36vh, 440px); border-top: 6px solid #d8dce6; }
+.host .pod.p3 { min-height: clamp(180px, 29vh, 360px); border-top: 6px solid var(--apricot); }
+.host .pod.p1 {
+  min-height: clamp(280px, 46vh, 560px); min-width: clamp(260px, 32vw, 560px);
+  background: linear-gradient(180deg, #ffd45a 0%, var(--flag-orange) 55%, #e08a00 100%);
+  color: var(--ink); padding-top: 24px;
+  box-shadow: 0 0 24px 6px rgba(255, 214, 90, .95), 0 0 70px 24px rgba(242, 168, 0, .75), 0 0 150px 60px rgba(242, 168, 0, .4);
+  animation: winnerGlow 2.4s ease-in-out infinite alternate;
+  z-index: 2;
+}
+.host .pod.p1 .rank { font-size: clamp(90px, 13vw, 220px); }
+.host .pod.p1 .nm { font-size: clamp(34px, 4.6vw, 84px); text-shadow: 0 0 10px #fff, 0 0 26px rgba(255, 244, 190, .95), 0 0 54px rgba(255, 255, 255, .7); }
+.host .pod.p1 .tag { font-size: clamp(28px, 3.6vw, 64px); letter-spacing: .05em; color: var(--ink); text-shadow: 0 0 10px #fff, 0 0 24px rgba(255, 244, 190, .95), 0 0 48px rgba(255, 255, 255, .7); }
+@keyframes winnerGlow {
+  from { box-shadow: 0 0 20px 4px rgba(255, 214, 90, .85), 0 0 60px 18px rgba(242, 168, 0, .6), 0 0 120px 44px rgba(242, 168, 0, .3); }
+  to   { box-shadow: 0 0 34px 10px rgba(255, 228, 120, 1),  0 0 90px 34px rgba(242, 168, 0, .85), 0 0 190px 80px rgba(242, 168, 0, .5); }
+}
+@media (prefers-reduced-motion: reduce) { .host .pod.p1 { animation: none; } }
+
+.host .lastplace {
+  align-self: center; width: min(100%, 900px); margin-top: clamp(8px, 2vh, 28px); text-align: center; position: relative;
+  padding: clamp(28px, 3vw, 44px) clamp(18px, 2.4vw, 36px) clamp(16px, 2vw, 28px);
+  border: 4px dashed #8a93a8; border-radius: 18px; background: rgba(20, 8, 14, .7);
+}
+.host .lp-badge {
+  position: absolute; top: 0; left: 50%; transform: translate(-50%, -50%);
+  background: #8a93a8; color: var(--ink); font-weight: 800; letter-spacing: .18em;
+  font-size: clamp(16px, 1.6vw, 26px); padding: 6px 22px; border-radius: 999px; white-space: nowrap;
+}
+.host .lp-title { font-family: Georgia, "Times New Roman", serif; font-style: italic; font-size: clamp(30px, 3.6vw, 60px); font-weight: 700; color: var(--cream); }
+.host .lp-name { font-size: clamp(26px, 3vw, 50px); font-weight: 800; margin-top: 6px; overflow-wrap: anywhere; }
+.host .lp-score { color: var(--muted); font-size: clamp(18px, 1.8vw, 30px); margin-top: 4px; }

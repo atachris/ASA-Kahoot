@@ -88,7 +88,11 @@ function hostView(game, ranks) {
     };
   }
   if (game.phase === 'final') {
-    v.final = { top: ranks.slice(0, 10).map(p => ({ name: p.name, score: p.score })) };
+    const lastP = ranks.length > 3 ? ranks[ranks.length - 1] : null;
+    v.final = {
+      top: ranks.slice(0, 10).map(p => ({ name: p.name, score: p.score })),
+      last: lastP ? { name: lastP.name, score: lastP.score, place: ranks.length } : null
+    };
   }
   return v;
 }

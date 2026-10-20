@@ -150,7 +150,8 @@ function render() {
       const p = s.final.top[i];
       if (!p) return;
       const d = el('div', 'pod p' + (i + 1));
-      d.append(el('div', 'nm', (i + 1) + '. ' + p.name), el('div', 'sc', p.score + ' pts'));
+      const tag = ['WINNER!!!!!', 'Good try maybe next year', 'Unlucky'][i];
+      d.append(el('div', 'rank', String(i + 1)), el('div', 'nm', p.name), el('div', 'tag', tag), el('div', 'sc', p.score + ' pts'));
       pod.appendChild(d);
     });
     c.appendChild(pod);
@@ -159,6 +160,17 @@ function render() {
       rest.classList.add('rest');
       rest.querySelectorAll('.rk').forEach((n, i) => { n.textContent = String(i + 4); });
       c.appendChild(rest);
+    }
+    if (s.final.last) {
+      const L = s.final.last;
+      const lp = el('div', 'lastplace');
+      lp.append(
+        el('div', 'lp-badge', 'LAST PLACE'),
+        el('div', 'lp-title', 'First place in Reverse'),
+        el('div', 'lp-name', L.name),
+        el('div', 'lp-score', 'Place ' + L.place + ' · ' + L.score + ' pts')
+      );
+      c.appendChild(lp);
     }
     const foot = el('div', 'foot');
     foot.append(button('Play again with same players', () => act('restart')), button('New game code', () => newGame(), 'quiet'));
